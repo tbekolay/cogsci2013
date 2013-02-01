@@ -17,3 +17,5 @@ Instead, it is available in my figshare account:
 
 If these data files are put in the appropriate directories in
 `results`, the figures from the paper can be recreated.
+
+Licensed under the [MIT license](http://tbekolay.mit-license.org/).
