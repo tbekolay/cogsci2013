@@ -33,3 +33,9 @@ nosetests.xml
 .mr.developer.cfg
 .project
 .pydevproject
+
+# Nengo
+*.class
+
+# Mac stuff
+.DS_Store
