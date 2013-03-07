@@ -15,3 +15,6 @@ However, if you don't want to waste those CPU
 cycles, you can download the results used
 to generate the paper on
 [figshare](http://figshare.com/articles/CogSci2013_Experiment_3_Results/155317)
+
+Or, to save even more time, just run the `download_results.py`
+script with Python (requires `requests`).

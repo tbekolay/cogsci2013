@@ -10,4 +10,7 @@ package and `mongodb` running.
 However, if you don't want to waste those CPU
 cycles, you can download the results used
 to generate the paper on
-[figshare](http://figshare.com/articles/CogSci2013_Experiment_2_Optimation/155525)
+[figshare](http://figshare.com/articles/CogSci2013_Experiment_2_Optimation/155525).
+
+Or, to save even more time, just run the `download_results.py`
+script with Python (requires `requests`).
