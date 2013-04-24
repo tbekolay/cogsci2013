@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 from bootstrap import ci
 from scipy.optimize import curve_fit
 
-figuredir = "../../paper/figures/"
+figuredir = "../../figures/"
 
 class BCMSim(object):
     def __init__(self, theta, tau_pre, tau_post, pulse_delay, pulse_rate,

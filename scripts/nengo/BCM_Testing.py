@@ -4,7 +4,8 @@ import os.path
 import random
 from datetime import datetime
 
-scriptdir = os.path.expanduser("~/nengo-latest/trevor/")
+scriptdir = os.path.expanduser("~/nengo-latest/trevor/nengo/")
+logdir = os.path.expanduser("~/Programming/cogsci2013/results/bcm/")
 
 def make(dims, nperd=20, learn_rate=4e-3, seed=None, regime='bcm'):
     if seed is None:
@@ -36,10 +37,9 @@ def make(dims, nperd=20, learn_rate=4e-3, seed=None, regime='bcm'):
 
 
 def run(net, name, seed, length, interval=0.01):
-    log_dir = scriptdir + 'results/bcm/'
     log_name = '%s-%d' % (name, seed)
     logNode = nef.Log(net, "log",
-                      dir=log_dir, filename=log_name, interval=interval)
+                      dir=logdir, filename=log_name, interval=interval)
     if name == 'bcm':
         logNode.add_transform('post', termination="pre_00")
     logNode.add('post')
@@ -55,8 +55,6 @@ else:
     exp_length = 200.0
     exps = 50
     regimes = ('control', 'random', 'bcm')
-    
-    log_dir = scriptdir + 'results/bcm/'
     for seed in xrange(exps):
         for regime in regimes:
             if os.path.exists("%s/%s-%d.csv" % (logdir, regime, seed)):

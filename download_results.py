@@ -11,6 +11,8 @@ import os
 import zipfile
 
 
+resultsdir = "results/"
+
 def download_all(article_id, outdir, unzip=False):
     r = requests.get("http://api.figshare.com/v1/articles/" + article_id)
     detail = json.loads(r.content)
@@ -33,19 +35,19 @@ def download_all(article_id, outdir, unzip=False):
 print "============"
 print "Experiment 1"
 print "============"
-download_all("155314", "results/bcm")
+download_all("155314", resultsdir + "bcm")
 
 print "========================="
 print "Experiment 2 optimization"
 print "========================="
-download_all("155525", "results/functions-optimize", unzip=False)
+download_all("155525", resultsdir + "functions-optimize", unzip=False)
 
 print "============"
 print "Experiment 2"
 print "============"
-download_all("155606", "results/functions-test", unzip=False)
+download_all("155606", resultsdir + "functions-test", unzip=False)
 
 print "============"
 print "Experiment 3"
 print "============"
-download_all("155317", "results/digits", unzip=True)
+download_all("155317", resultsdir + "digits", unzip=True)

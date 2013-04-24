@@ -6,12 +6,13 @@ then analyzes it using numpy.
 """
 
 from analysis.learn_testing import process_csv, read_results_from_zip
-from Builder import Builder
-from LearnBuilder import LearnBuilder
+from nengo.Builder import Builder
+from nengo.LearnBuilder import LearnBuilder
 import os.path
 import subprocess as sp
 
 scriptdir = os.path.expanduser("~/nengo-latest/trevor/")
+resultsdir = os.path.expanduser("~/Programming/cogsci2013/results/")
 
 def make_argv(func, testtype, params):
     argv = [func, testtype]
@@ -35,7 +36,7 @@ def make_argv(func, testtype, params):
 def run(func, testtype, **params):
     withdefaults = LearnBuilder(func, testtype, **params)
 
-    outfile = (scriptdir + 'results/functions/'
+    outfile = (resultsdir + 'functions/'
                + Builder.name_hash(func, withdefaults.params))
 
     if os.path.exists("%s.zip" % outfile):

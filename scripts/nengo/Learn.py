@@ -1,11 +1,12 @@
 import os.path
 import sys
 # I make a symlink `trevor` in the nengo directory, pointing to scriptdir
-sys.path.append('trevor')  
+sys.path.append('trevor/nengo')  
 from Builder import Builder
 from LearnBuilder import LearnBuilder
 
-scriptdir = os.path.expanduser("~/nengo-latest/trevor/")
+scriptdir = os.path.expanduser("~/nengo-latest/trevor/nengo")
+logdir = os.path.expanduser("~/Programming/cogsci2013/results/")
 
 if False:
     builder = LearnBuilder('channel')
@@ -15,8 +16,8 @@ else:
     testtype = sys.argv[2]
     params = Builder.parse_params(sys.argv[3:])
     if testtype == 'full':
-	    logdir = scriptdir + "results/functions-test"
-	elif testtype == 'one':
-		logdir = scriptdir + "results/functions-optimize"
+        logdir = logdir + "functions-test"
+    elif testtype == 'one':
+        logdir = logdir + "functions-optimize"
     builder = LearnBuilder(name, testtype, **params)
     builder.run(name, logdir)

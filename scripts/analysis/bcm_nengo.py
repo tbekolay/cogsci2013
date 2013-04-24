@@ -8,8 +8,8 @@ import matplotlib.pyplot as plt
 from bootstrap import ci
 from glob import glob
 
-figuredir = "../../paper/figures/"
-
+figuredir = "../../figures/"
+resultsdir = "../../results/bcm/"
 
 def gini_index(vector):
     # ensure sorted (but don't change original vector)
@@ -117,8 +117,8 @@ def plot_bcm(control_files, random_files, bcm_files):
 
 
 if __name__ == '__main__':
-    results_dir = "../results/bcm/"
-    control_files = sorted(glob(results_dir + "control-*.csv"))
-    random_files = sorted(glob(results_dir + "random-*.csv"))
-    bcm_files = sorted(glob(results_dir + "bcm-*.csv"))
+    control_files = sorted(glob(resultsdir + "control-*.csv"))
+    random_files = sorted(glob(resultsdir + "random-*.csv"))
+    bcm_files = sorted(glob(resultsdir + "bcm-*.csv"))
     plot_bcm(control_files, random_files, bcm_files)
+

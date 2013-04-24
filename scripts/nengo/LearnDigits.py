@@ -6,7 +6,8 @@ import os.path
 from datetime import datetime
 
 scriptdir = os.path.expanduser("~/nengo-latest/trevor/")
-datadir = 'trevor/data/'  # Relative to Nengo directory
+datadir = os.path.expanduser("~/Programming/cogsci/data/")
+logdir = os.path.expanduser("~/Programming/cogsci/results/digits/")
 
 # Globals
 steps_per_input = 50
@@ -85,9 +86,9 @@ def make(learn_type='hPES', nperd=20, learn_rate=5e-5,
 
 
 def run(net, learn_type):
-    log_dir = scriptdir + 'results/digits/'
+
     log_name = 'digits-' + learn_type + "-" + datetime.now().strftime("%Y%m%d-%H_%M_%S") + ".csv"
-    logNode = nef.Log(net, "log", dir=log_dir, filename=log_name)
+    logNode = nef.Log(net, "log", dir=logdir, filename=log_name)
     logNode.add('input', name='learning', origin='learnswitch', tau=0.0)
     logNode.add('post')
     simtime = steps_per_input * len(inputs) * dt  # Simulation length

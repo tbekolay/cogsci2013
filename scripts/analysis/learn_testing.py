@@ -19,8 +19,8 @@ import sys
 sys.path.append('..')
 from LearnBuilder import LearnBuilder
 
-figuredir = "../../paper/figures/"
-
+figuredir = "../../figures/"
+resultsdir = "../../results/"
 
 def get_params(fn):
     with open(fn, 'r') as pfile:
@@ -249,9 +249,9 @@ if __name__ == '__main__':
 
     zips = {}
     zips['channel'] = [z[:-4] for z in
-                       glob('../results/functions-test/channel*.zip')]
+                       glob(resultsdir + 'functions-test/channel*.zip')]
     zips['conv'] = [z[:-4] for z in
-                    glob('../results/functions-test/conv*.zip')]
+                    glob(resultsdir + 'functions-test/conv*.zip')]
 
     for func in funcs:
         data = process_zips(zips[func])
@@ -265,8 +265,8 @@ if __name__ == '__main__':
     plot_learn_curves(zips['channel'], zips['conv'])
 
     zips['channel'] = [z[:-4] for z in
-                       glob('../results/functions-optimize/channel*.zip')]
+                       glob(resultsdir + 'functions-optimize/channel*.zip')]
     zips['conv'] = [z[:-4] for z in
-                    glob('../results/functions-optimize/conv*.zip')]
+                    glob(resultsdir + 'functions-optimize/conv*.zip')]
 
     plot_params(zips['channel'], zips['conv'])
