@@ -39,3 +39,11 @@ nosetests.xml
 
 # Mac stuff
 .DS_Store
+
+# LaTeX output
+*.aux
+*.bbl
+*.blg
+*.log
+bekolay_1_31.pdf
+

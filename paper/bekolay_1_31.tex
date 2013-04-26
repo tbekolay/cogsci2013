@@ -8,6 +8,12 @@
 
 \graphicspath{{../figures/}}
 
+\renewcommand{\thefootnote}{\fnsymbol{footnote}}
+
+\makeatletter
+\def\blfootnote{\xdef\@thefnmark{}\@footnotetext}
+\makeatother
+
 \title{Simultaneous unsupervised and supervised learning of
   cognitive functions \\ in biologically plausible spiking
   neural networks}
@@ -64,7 +70,19 @@ a biologically plausible manner.
 We improve upon a technique previously presented in
 \citeA{MacNeil2011} by combining their error-minimization learning rule
 with an unsupervised learning rule,
-making it more biologically plausible and robust.
+making it more biologically plausible and robust.\blfootnote{\textbf{Abbreviations}
+  \begin{description} \itemsep 0pt
+    \item[BCM] Bienenstock, Cooper, Munro learning rule;
+      Eq~\eqref{eq:bcm}
+    \item[hPES] Homeostatic Prescribed Error Sensitivity;
+      Eq~\eqref{eq:hpes}
+    \item[NEF] Neural Engineering Framework; see Theory
+    \item[PES] Prescribed Error Sensitivity;
+      Eq~\eqref{eq:pes}
+    \item[SPA] Semantic Pointer Architecture; see Theory
+    \item[STDP] Spike-timing dependent plasticity \cite{Bi2001}
+  \end{description}
+  }
 
 While supervised and unsupervised learning
 in artificial neural networks have been
@@ -84,7 +102,10 @@ such as spike-timing dependent plasticity (STDP).
 
 Online learning in spiking networks
 faces significant challenges
-due to the intrinsic noisiness of spiking neurons.
+due to the temporal dynamics of spiking neurons.
+Spike rates cannot be directly used online,
+and must be estimated with causal filters,
+producing a noisy estimate.
 Additionally, there are points during online learning
 in which the inputs and desired outputs
 are not correct because the network
@@ -107,14 +128,14 @@ in spiking neural networks
 (e.g., SpikeProp \cite{Bohte2002}, ReSuMe \cite{Ponulak2006a})
 can learn only simple operations,
 such as learning to spike at a specific time.
+Others (e.g., SORN \cite{Lazar2009}, reservoir computing approaches
+\cite{Paugam2008}) can solve complex tasks like classification,
+but it is not clear how these approaches can be applied
+to a general cognitive system.
 The functions learned by our approach are
-sophisticated nonlinear transformations
-of high-dimensional vector spaces that are
-cognitively relevant.
-We employ the Semantic Pointer Architecture (SPA)
-to bridge the gap between spiking neural activity
-and semantically rich structured representations
-that can underwrite cognitive behaviour.
+complex and have already been combined into
+a general cognitive system, called the
+Semantic Pointer Architecture (SPA).
 Previously, the SPA has been used to create Spaun,
 a brain model made up of 2.5 million neurons
 that can do eight diverse tasks \cite{Eliasmith2012}.
@@ -181,7 +202,7 @@ a direction in the $n$-dimensional space,
 which we call the neuron's \textit{encoder}.
 The activity of a neuron can be expressed as
 \begin{equation}
-	a = G[\alpha \mathbf{e} \cdot \mathbf{x} + J_{bias}]
+  a = G[\alpha \mathbf{e} \cdot \mathbf{x} + J_{bias}]
 \end{equation}
 where $G[\cdot]$ is the nonlinear neural activation function,
 $\alpha$ is a scaling factor (gain) associated with the neuron,
@@ -250,7 +271,7 @@ and we want to connect it to population B, encoding pointer $Y$,
 a feedforward connection with the following connection weights
 transmits that semantic pointer, such that $Y \approx X$.
 \begin{equation}
-	\omega_{ij} = \alpha_j \mathbf{e}_j \mathbf{d}_i,
+  \omega_{ij} = \alpha_j \mathbf{e}_j \mathbf{d}_i,
 \end{equation}
 where $i$ indexes the presynaptic population A,
 and $j$ indexes the postsynaptic population B.
@@ -275,7 +296,7 @@ these transformations online through experience.
 \citeA{MacNeil2011} proposed a learning rule
 that minimizes a similar least-squares
 problem online.
-\begin{align}
+\begin{align} \label{eq:pes}
   \Delta \mathbf{d}_i &= \kappa \mathbf{E} a_i \nonumber \\
   \Delta \omega_{ij} &= \kappa \alpha_j \mathbf{e}_j \cdot \mathbf{E} a_i,
 \end{align}
@@ -315,8 +336,8 @@ A Hebbian learning rule widely studied
 in the context of the vision system
 is the BCM rule \cite{Bienenstock1982}.
 The general form is
-\begin{equation}
-	\Delta \omega_{ij} = a_i a_j (a_j - \theta),
+\begin{equation} \label{eq:bcm}
+  \Delta \omega_{ij} = a_i a_j (a_j - \theta),
 \end{equation}
 where $\theta$ is the \textit{modification threshold}.
 When the output activity $a_j$ is
@@ -405,7 +426,7 @@ of the spiking BCM rule.
 The rule is a weighted sum of the
 unique terms in each rule.
 \begin{equation} \label{eq:hpes}
-	\Delta \omega_{ij} = \kappa \, \alpha_j a_i \left(
+  \Delta \omega_{ij} = \kappa \, \alpha_j a_i \left(
     S \, \mathbf{e}_j \cdot \mathbf{E} + (1 - S) \, a_j(a_j - \theta) \right),
 \end{equation}
 where $0 \le S \le 1$ is the relative weighting of
@@ -420,7 +441,7 @@ this rule is equivalent to spiking BCM.
 We hypothesize that the unsupervised
 component helps maintain homeostasis
 while following the error gradient defined
-by the supervised component	.
+by the supervised component.
 Because of this, we call the rule
 the homeostatic Prescribed Error Sensitivity (hPES) rule.
 We hypothesize that this rule will
@@ -429,6 +450,17 @@ of transformations that the PES rule can learn,
 and that this class includes operations
 critical to cognitive representation,
 such as semantic pointer binding.
+
+Note that a similar combination can be done
+with other supervised learning rules that
+modify connection weights.
+A more general form of Equation~\eqref{eq:hpes}
+would replace the local error quantity
+$\mathbf{e}_j \cdot \mathbf{E}$ with $\delta$,
+which could be determined through another method.
+However, for clarity, we will use hPES
+to refer to the specific form in
+Equation~\eqref{eq:hpes}.
 
 \section{Methods}
 
@@ -502,11 +534,15 @@ In order to investigate how
 simultaneous supervised and unsupervised learning
 scales in higher dimensional situations,
 we created a network similar to that in Experiment 2,
-but whose input is handwritten digits
-from the MNIST database.
+but whose input is handwritten digits.\footnote{Digits
+  from MNIST: \url{http://yann.lecun.com/exdb/mnist/}}
 In order to be computationally tractable,
 the 28-by-28 pixel images were compressed to a 50-dimensional
-semantic pointer using a deep belief network \cite{Tang2010}.
+semantic pointer using a sparse deep belief network
+that consists of four feedforward
+Restricted Boltzmann Machines
+trained with a form of contrastive divergence
+(full details in \citeNP{Tang2010}).
 Those 50-dimensional pointers were projected to
 an output population of 10 dimensions,
 where each dimension represents
@@ -521,6 +557,10 @@ the hPES rule was active.
 The network was then tested with 10,000
 training examples in which the label
 was not provided.
+The results are compared to an analogous control network,
+in which the 50-dimensional pointers are classified
+with a cleanup memory whose connection weights
+are static \cite{Eliasmith2012}.
 
 \subsubsection{Learning parameters}
 
@@ -588,10 +628,11 @@ extremely similar to the classical
 \begin{center}
 \includegraphics[width=\columnwidth]{fig1-bcm-stdp}
 \end{center}
-\caption{Classical STDP curve replicated by two neurons
+\caption{STDP curve replicated by two neurons
   connected with the hPES rule, $S = 0$.
   Solid and dashed lines are best fits of the curve
-  $a\,e^{-x / \tau}$.
+  $a\,e^{-x / \tau}$ for the experimental
+  and simulated data, respectively.
   Experimental data from \cite{Bi2001}.}
 \label{fig:stdp-curve}
 \end{figure}
@@ -667,7 +708,7 @@ can be seen decreasing over time in Figure~\ref{fig:learn}.
 The parameters used for Figure~\ref{fig:learn}
 are listed in Tables~\ref{tab:params-1} and \ref{tab:params-2}.
 The transformations are learned quickly
-($\sim 25s$ for transmission, $\sim 45s$ for binding).
+(approximately 25s for transmission, 45s for binding).
 Therefore, the central binding and transmission
 operations of the SPA
 are learnable with the hPES rule.
