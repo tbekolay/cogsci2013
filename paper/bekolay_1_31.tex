@@ -70,10 +70,10 @@ a biologically plausible manner.
 We improve upon a technique previously presented in
 \citeA{MacNeil2011} by combining their error-minimization learning rule
 with an unsupervised learning rule,
-making it more biologically plausible and robust.\blfootnote{\textbf{Abbreviations}
+making it more biologically plausible and robust.\blfootnote{ \vspace{-12pt}
   \begin{description} \itemsep 0pt
     \item[BCM] Bienenstock, Cooper, Munro learning rule;
-      Eq~\eqref{eq:bcm}
+      Eq~\eqref{eq:orig-bcm}
     \item[hPES] Homeostatic Prescribed Error Sensitivity;
       Eq~\eqref{eq:hpes}
     \item[NEF] Neural Engineering Framework; see Theory
@@ -185,9 +185,6 @@ In the case of learning,
 we exploit NEF representations in order to
 learn transformations analogous
 to those that can be found through the NEF's methods.
-In this work, we do not learn recurrent connections,
-but \citeA{MacNeil2011} have shown that the recurrent case
-can be learned with the same approach.
 
 \subsubsection{Representing semantic pointers in spiking neurons}
 
@@ -211,14 +208,6 @@ $\mathbf{x}$ is the vector to be encoded, and
 $J_{bias}$ is the background current of the cell
 when $\mathbf{x} = 0$.
 
-%In the case of sensory neurons,
-%there is a clear analogy between
-%the encoder and the receptive field of the neuron.
-%Downstream, the encoders are defined over a
-%``conceptual space'' instead of a sensory space;
-%at the output, the encoders are defined over a motor space.
-%All of these spaces follow the same principles.
-
 The vector (i.e., semantic pointer)
 that a population represents
 can be estimated from the recent activity
@@ -229,8 +218,8 @@ weighted by an $n$-dimensional \textit{decoder}.
 \begin{equation}
   \mathbf{\hat{x}}(t) = \sum_i \mathbf{d}_i a_i(t),
 \end{equation}
-where $\mathbf{d}_i$ is the decoder,
-and $a_i$ is activity of neuron $i$.
+where $\mathbf{d}_i$ is the decoder
+and $a_i$ is the activity of neuron $i$.
 
 Neural activity is interpreted as a
 filtered spike train; i.e.,
@@ -242,20 +231,10 @@ applied to each spike,
 and $s$ is the set of all spikes occurring
 before the current time $t$.
 
-%The interpretation of the activity of a neuron
-%as a filtered version of the neuron's spike train
-%is what enables flexibility in the decoding scheme.
-%If the time constant on the filter is very small,
-%the decoding is highly sensitive to individual spikes,
-%making it analogous to temporal coding schemes.
-%If the time constant is larger,
-%the decoding is driven by overall recent activity,
-%making it analogous to rate coding schemes.
-
 The decoders are found through a least-squares minimization
 of the difference between the decoded estimate
 and the actual encoded vector.
-\begin{equation}
+\begin{equation} \label{eq:decoders}
   \mathbf{d} = \Upsilon^{-1} \Gamma \hspace{1.8em}
   \Gamma_{ij} = \int a_i a_j dx \hspace{1.8em}
   \Upsilon_j = \int a_j \mathbf{x} dx
@@ -287,15 +266,10 @@ the decoded estimate of $f(X)$ and the actual $f(X)$.
 
 \subsection{Supervised learning: PES rule}
 
-The transformation principle determines
-connection weight matrices that compute
-arbitrary functions by solving an optimization problem.
-However, in the biological brain, connection weights
-change over time, presumably learning to compute
-these transformations online through experience.
 \citeA{MacNeil2011} proposed a learning rule
-that minimizes a similar least-squares
-problem online.
+that minimizes the error minimized
+in Equation~\eqref{eq:decoders} online.
+
 \begin{align} \label{eq:pes}
   \Delta \mathbf{d}_i &= \kappa \mathbf{E} a_i \nonumber \\
   \Delta \omega_{ij} &= \kappa \alpha_j \mathbf{e}_j \cdot \mathbf{E} a_i,
@@ -305,22 +279,16 @@ $\mathbf{E}$ is a vector representing the error we wish to minimize,
 and other terms are as before.
 
 When put in terms of connections weights ($\omega_{ij}$),
-the rule matches the familiar Delta-rule form;
-however, since we do not have access to the
-derivative of the activation function
-in a biologically plausible simulation,
-we instead use the dot product of
-the error being minimized and the neuron's encoder,
-scaled by neuronal gain.
-This quantity is analogous to the local error term
+the rule matches the familiar Delta-rule form.
+Note that $\alpha_j \mathbf{e}_j \cdot \mathbf{E}$
+is quantity is analogous to the local error term
 $\delta$ in backpropagation \cite{Rumelhart1986};
 they are both a means of translating a global error signal
 to a local error signal that can be used to
 change an individual synaptic connection weight.
-However, rather than using the derivative
-of the neuron's activation function,
-this global-to-local mapping is done
-by imposing the portion of the error vector space
+The key difference between this rule
+and backpropagation is the global-to-local mapping
+is done by imposing the portion of the error vector space
 that each neuron will be sensitive to via the encoder.
 %While prescribing each neuron's error sensitivity
 %may make it less flexible than the hidden units
@@ -335,8 +303,13 @@ the Prescribed Error Sensitivity (PES) rule.
 A Hebbian learning rule widely studied
 in the context of the vision system
 is the BCM rule \cite{Bienenstock1982}.
+This rule has been used to explain orientation selectivity
+and ocular dominance \cite{Bienenstock1982}.
+Theoretically, it has been asserted that BCM is equivalent
+to triplet-based STDP learning rules \cite{Pfister2006}.
+
 The general form is
-\begin{equation} \label{eq:bcm}
+\begin{equation} \label{eq:orig-bcm}
   \Delta \omega_{ij} = a_i a_j (a_j - \theta),
 \end{equation}
 where $\theta$ is the \textit{modification threshold}.
@@ -346,46 +319,29 @@ the synapse will be potentiated;
 when the output activity is less than the modification threshold,
 the synapse will be depressed.
 
-The modification threshold reflects a cell's
-typical homeostatic activity;
-for that reason, it is typically calculated as
+The modification threshold reflects the expectation
+of a cell's activity.
+It is typically calculated as
 the temporal average of the output activity $a_j$
 for a long time window (on the order of hours).
 The idea behind BCM is that cells
-driven above their homeostatic norm
+driven above their expectation
 must be playing an important role in a circuit,
-so its afferent synapses become potentiated,
-and vice versa for cells driven less than normal.
+so their afferent synapses become potentiated.
+Cells driven less than normal have synapses depressed.
 If either of these effects persists long enough,
-the modification threshold will change
+the modification threshold changes
 to reflect the new expectation
 of the cell's activity.
-
-Simulations using forms of the BCM rule
-have been used to explain orientation selectivity
-and ocular dominance in the visual system \cite{Bienenstock1982}.
-Theoretical examinations of the BCM rule
-have asserted that it is equivalent
-to triplet-based STDP learning rules
-\cite{Pfister2006}.
 
 However, BCM as originally formulated
 is based on rate neurons,
 not the discontinuous spiking neurons
 used in biologically plausible simulations.
-The difficulty in implementing BCM in spiking networks
-has caused others to create more complicated learning rules
-able to replicate the effects of BCM in spiking networks
-\cite{Pfister2006,Yger2012}.
-
 We implement BCM in biologically plausible spiking networks
 by interpreting neural activity as
-postsynaptic current filtered spike trains,
-and by using an exponential filter
-to update the modification threshold $\theta$.
-Additionally, we scale the traditional BCM rule error
-by a learning rate and the neuronal gain
-to obtain the following spiking BCM rule.
+spikes that are filtered by
+a postsynaptic current curve.
 \begin{align} \label{eq:bcm}
   \Delta \omega_{ij} &= \kappa \alpha_j a_i a_j (a_j - \theta) \nonumber \\
   \theta(t) &= e^{-t / \tau} \, \theta(t-1) +
@@ -402,11 +358,10 @@ With our spiking BCM implementation,
 we aim to test the claim that BCM is equivalent
 to triplet STDP rules.
 Functionally, we hypothesize that
-this unsupervised learning
-will not significantly affect the function
-computed by a weight matrix,
-but will result in sparsification
-of the weight matrix.
+unsupervised learning
+will have a small detrimental effect
+on the function being computed by a weight matrix,
+but will result in weight sparsification.
 
 \subsection{Simultaneous supervised and unsupervised learning: hPES rule}
 
@@ -466,29 +421,15 @@ Equation~\eqref{eq:hpes}.
 
 We performed three experiments in order to
 test our hypotheses about the hPES rule.
-The first experiment tests the unsupervised learning's
-effect on an existing connection weight matrix
-solved to transfer a semantic pointer
-from one population to another.
-The second experiment tests the hPES rule's
-ability to learn a connection weight matrix
-that can transfer semantic pointers
-and a connection weight matrix
-that can bind semantic pointers together.
-The third experiment tests the hPES
-rule's ability to learn a connection weight matrix
-that classifies 50-dimensional semantic pointers
-representing handwritten digits.
-
-All of the scripts used to implement
+Experiments were implemented in the Nengo
+simulation environment, in which we implemented
+the PES, spiking BCM, and hPES learning rules.
+All experiments use leaky integrate-and-fire
+neurons with default parameters.
+The scripts used to implement
 and analyze these experiments
 are MIT licensed and available at
 \url{http://github.com/tbekolay/cogsci2013}.
-These scripts use the Nengo simulator,
-which includes our implementation
-of the PES, spiking BCM, and hPES rules.
-All of the scripts use leaky integrate-and-fire
-neurons with default parameters.
 
 \subsubsection{Experiment 1: Unsupervised learning}
 
@@ -507,8 +448,7 @@ with $S = 0$ (i.e., according to the spiking BCM rule \eqref{eq:bcm}).
 
 \subsubsection{Experiment 2: Supervised learning}
 
-In order to investigate the effects
-of supervised and
+In order to investigate the effects of supervised and
 simultaneous supervised and unsupervised learning,
 we created a network composed of two populations
 connected in a feedforward manner,
@@ -642,7 +582,7 @@ the frequency dependence of STDP;
 in order to capture those effects,
 modellers have created STDP rules that take into
 account triplets and quadruplets of spikes,
-rather than simply pre-post spike pairings \cite{Pfister2006}.
+rather than just pre-post spike pairings \cite{Pfister2006}.
 These rules are able to replicate
 the frequency dependence of the STDP protocol.
 Figure~\ref{fig:stdp-freq} shows that,
@@ -724,13 +664,6 @@ This is due to how effectively
 the NEF can optimize weights to perform
 this simple linear transformation
 in the control networks.
-
-%While we have not analyzed if the weight matrices
-%become more sparse in this situation,
-%the unsupervised learning component appears
-%to facilitate the supervised learning in some way.
-%Consequently, the rule is able to strike
-%a desirable balance between efficiency and accuracy.
 
 \begin{figure}[ht]
 \begin{center}
