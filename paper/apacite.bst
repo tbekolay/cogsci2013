@@ -5089,7 +5089,7 @@ FUNCTION {default.type}
 FUNCTION {initialize}
 {   %
     % Maximum number of names to be formatted .
-  #6  'name.max :=
+  #12  'name.max :=
 }
 
 FUNCTION {init.old.number}

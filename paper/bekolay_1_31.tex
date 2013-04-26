@@ -87,9 +87,9 @@ making it more biologically plausible and robust.\blfootnote{ \vspace{-12pt}
 While supervised and unsupervised learning
 in artificial neural networks have been
 implemented and combined in previous studies
-(e.g., Backpropagation \cite{Rumelhart1986},
-Self-Organizing Maps \cite{Kohonen1982},
-Deep Belief Networks \cite{Hinton2006}),
+(e.g., Backpropagation [\citeNP{Rumelhart1986}],
+Self-Organizing Maps [\citeNP{Kohonen1982}],
+Deep Belief Networks [\citeNP{Hinton2006}]),
 past work cannot be implemented in spiking networks,
 and often employs explicit offline training phases.
 These approaches thus cannot be be used online,
@@ -125,11 +125,11 @@ which are not available to a synapse.
 
 Other techniques doing similar types of learning
 in spiking neural networks
-(e.g., SpikeProp \cite{Bohte2002}, ReSuMe \cite{Ponulak2006a})
+(e.g., SpikeProp [\citeNP{Bohte2002}], ReSuMe [\citeNP{Ponulak2006a}])
 can learn only simple operations,
 such as learning to spike at a specific time.
-Others (e.g., SORN \cite{Lazar2009}, reservoir computing approaches
-\cite{Paugam2008}) can solve complex tasks like classification,
+Others (e.g., SORN [\citeNP{Lazar2009}], reservoir computing approaches
+[\citeNP{Paugam2008}]) can solve complex tasks like classification,
 but it is not clear how these approaches can be applied
 to a general cognitive system.
 The functions learned by our approach are
@@ -143,7 +143,7 @@ Spaun accomplishes these tasks by
 transmitting and manipulating semantic pointers,
 which are compressed neural representations
 that carry surface semantic content,
-and can be dereferenced to generate
+and can be decompressed to generate
 deep semantic content \cite{EliasmithInPress}.
 Semantic pointers are composed to represent syntactic structure
 using a ``binding'' transformation,
@@ -279,9 +279,9 @@ $\mathbf{E}$ is a vector representing the error we wish to minimize,
 and other terms are as before.
 
 When put in terms of connections weights ($\omega_{ij}$),
-the rule matches the familiar Delta-rule form.
-Note that $\alpha_j \mathbf{e}_j \cdot \mathbf{E}$
-is quantity is analogous to the local error term
+the rule resembles backpropagation.
+The quantity $\alpha_j \mathbf{e}_j \cdot \mathbf{E}$
+is analogous to the local error term
 $\delta$ in backpropagation \cite{Rumelhart1986};
 they are both a means of translating a global error signal
 to a local error signal that can be used to
@@ -435,7 +435,7 @@ are MIT licensed and available at
 
 In order to investigate the effects
 of unsupervised learning,
-we created a network composed of two populations
+we constructed a network composed of two populations
 connected in a feedforward manner
 such that one population provides input to the other.
 The network can be run in a ``control'' regime,
@@ -450,7 +450,7 @@ with $S = 0$ (i.e., according to the spiking BCM rule \eqref{eq:bcm}).
 
 In order to investigate the effects of supervised and
 simultaneous supervised and unsupervised learning,
-we created a network composed of two populations
+we constructed a network composed of two populations
 connected in a feedforward manner,
 and several other populations that provide
 an error signal and collect performance information.
@@ -465,15 +465,13 @@ The network can be run in a ``learning'' regime,
 in which the weights between the two populations
 are initially random
 and are modified over time by the hPES rule.
-Various values of $S$ were tested,
-including the completely supervised case of $S = 1$.
 
 \subsubsection{Experiment 3: Digit classification}
 
 In order to investigate how
 simultaneous supervised and unsupervised learning
 scales in higher dimensional situations,
-we created a network similar to that in Experiment 2,
+we constructed a network similar to that in Experiment 2,
 but whose input is handwritten digits.\footnote{Digits
   from MNIST: \url{http://yann.lecun.com/exdb/mnist/}}
 In order to be computationally tractable,
@@ -506,10 +504,10 @@ are static \cite{Eliasmith2012}.
 
 While there are many hundreds of parameters
 involved in each network simulation,
-the vast majority of them are randomly selected
+the vast majority are randomly selected
 within a biologically plausible range
 without significantly affecting performance.
-Some parameters, especially those affecting
+However, some parameters, especially those affecting
 the learning rule, have a significant performance effect.
 These significant parameters and the values
 used in specific simulations are listed
@@ -736,18 +734,17 @@ then allowed to change for 50 simulations.
 
 Surprisingly, despite optimizing over an additional dimension,
 when $S < 1$ error rates were
-generally lower during the optimization process
+lower during the optimization process
 for the binding network, but not the transmission network.
 In both cases, the variance of the hPES rule is lower.
 Figure~\ref{fig:params} summarizes the performance of
-all 200 networks used to optimize parameters.
-While in all cases parameters were found to achieve
+all 200 networks generated for parameter optimization.
+While in all cases parameters were found that achieve
 error rates close to the control networks,
 hPES was much more robust to changes
-in the parameters when $S < 1$ when learning binding.
+in the parameters when $S < 1$ in the binding case.
 This suggests that unsupervised learning
-is beneficial in higher-dimensional nonlinear situations,
-but not beneficial in learning linear transformations.
+may be beneficial in higher-dimensional nonlinear situations.
 
 \section{Discussion}
 
