@@ -39,9 +39,10 @@
   Semantic pointers have previously been used to build Spaun,
   which is currently the world's largest functional brain model
   \cite{Eliasmith2012}.
-  However, it has not yet been shown
-  how the operations needed for binding and transmission
-  of semantic pointers can be learned.
+  Two operations commonly performed by Spaun are semantic pointer
+  binding and transmission.
+  It has not yet been shown
+  how the binding and transmission operations can be learned.
   The learning rule combines a previously
   proposed supervised learning rule
   and a novel spiking form
@@ -51,8 +52,8 @@
   at the cost of increased signal transmission error.
   We also demonstrate that the combined learning rule
   can learn transformations
-  as well as the supervised rule alone,
-  and as well as the offline optimization used previously.
+  as well as the supervised rule and
+  the offline optimization used previously.
   We also demonstrate that the combined learning rule
   is more robust to changes in parameters
   and leads to better outcomes
@@ -84,44 +85,43 @@ making it more biologically plausible and robust.\blfootnote{ \vspace{-12pt}
   \end{description}
   }
 
-While supervised and unsupervised learning
-in artificial neural networks have been
-implemented and combined in previous studies
+There are three weaknesses with most
+previous attempts at combining
+supervised and unsupervised learning
+in artificial neural networks
 (e.g., Backpropagation [\citeNP{Rumelhart1986}],
 Self-Organizing Maps [\citeNP{Kohonen1982}],
-Deep Belief Networks [\citeNP{Hinton2006}]),
-past work cannot be implemented in spiking networks,
-and often employs explicit offline training phases.
-These approaches thus cannot be be used online,
-and cannot be easily compared to biological learning processes.
-The work proposed here overcomes these limitations,
-remaining functional during online learning,
-and employing spiking neural networks
+Deep Belief Networks [\citeNP{Hinton2006}]).
+These approaches
+1) have explicit offline training phases that are
+distinct from functional use of the network,
+2) require many layers with some layers
+connected with supervised learning and others
+with unsupervised learning, and
+3) use non-spiking neuron models.
+The approach proposed here overcomes these limitations.
+Our approach 1) remains functional during online learning,
+2) requires only two layers connected with
+simultaneous supervised and unsupervised learning,
+and 3) employs spiking neuron models
 to reproduce central features of biological learning,
 such as spike-timing dependent plasticity (STDP).
 
-Online learning in spiking networks
+Online learning with spiking neuron models
 faces significant challenges
 due to the temporal dynamics of spiking neurons.
-Spike rates cannot be directly used online,
+Spike rates cannot be used directly,
 and must be estimated with causal filters,
 producing a noisy estimate.
-Additionally, there are points during online learning
+When the signal being estimated changes,
+there is some time lag before the spiking activity
+reflects the new signal,
+resulting in situations during online learning
 in which the inputs and desired outputs
-are not correct because the network
-is transitioning between known input-output pairs.
-Our approach is robust to these sources of noise.
-The proposed learning rule is Hebbian,
-as it is a function of the product of
-presynaptic input activity and postsynaptic output activity.
-The rule does not depend on any quantities that
-would not be locally available
-to a synapse.
-Other supervised learning techniques,
-such as backpropagation \cite{Rumelhart1986}
-depend on global error signals
-and transfer function derivatives,
-which are not available to a synapse.
+are out of sync.
+Our approach is robust to these sources of noise,
+while only depending on quantities that
+are locally available to a synapse.
 
 Other techniques doing similar types of learning
 in spiking neural networks
@@ -134,7 +134,7 @@ but it is not clear how these approaches can be applied
 to a general cognitive system.
 The functions learned by our approach are
 complex and have already been combined into
-a general cognitive system, called the
+a general cognitive system called the
 Semantic Pointer Architecture (SPA).
 Previously, the SPA has been used to create Spaun,
 a brain model made up of 2.5 million neurons
@@ -150,7 +150,7 @@ using a ``binding'' transformation,
 which compresses the information in two semantic pointers
 into a single semantic pointer.
 Such representations can be ``collected''
-using superposition and collections
+using superposition, and collections
 can participate in further bindings to generate deep structures.
 Spaun performs these transformations by using
 the Neural Engineering Framework (NEF; \citeNP{Eliasmith2003})
@@ -166,7 +166,7 @@ In order to characterize cognitive functions
 at the level of spiking neurons,
 we employ the methods of the Semantic Pointer Architecture (SPA),
 which was recently used to create the world's largest
-functional brain model (Spaun; \citeNP{Eliasmith2012})
+functional brain model (Spaun; \citeNP{Eliasmith2012}),
 able to perform perceptual, motor, and cognitive functions.
 Cognitive functions in Spaun include working memory,
 reinforcement learning, syntactic generalization,
@@ -199,14 +199,13 @@ a direction in the $n$-dimensional space,
 which we call the neuron's \textit{encoder}.
 The activity of a neuron can be expressed as
 \begin{equation}
-  a = G[\alpha \mathbf{e} \cdot \mathbf{x} + J_{bias}]
+  a = G[\alpha \mathbf{e} \cdot \mathbf{x} + J_{bias}],
 \end{equation}
 where $G[\cdot]$ is the nonlinear neural activation function,
 $\alpha$ is a scaling factor (gain) associated with the neuron,
 $\mathbf{e}$ is the neuron's encoder,
 $\mathbf{x}$ is the vector to be encoded, and
-$J_{bias}$ is the background current of the cell
-when $\mathbf{x} = 0$.
+$J_{bias}$ is the background current of the cell.
 
 The vector (i.e., semantic pointer)
 that a population represents
@@ -258,18 +257,17 @@ Other linear transformations
 are implemented by multiplying $\mathbf{d}_i$
 by a linear operator.
 Nonlinear transformations are implemented
-by solving for a new set of decoding weights;
-rather than minimizing the difference
-between the decoded estimate of $X$ and the actual $X$,
-we instead minimize the difference between
-the decoded estimate of $f(X)$ and the actual $f(X)$.
+by solving for a new set of decoding weights.
+This is done by minimizing the difference between
+the decoded estimate of $f(\mathbf{x})$
+and the actual $f(\mathbf{x})$,
+rather than just $\mathbf{x}$, in Equation~\eqref{eq:decoders}.
 
 \subsection{Supervised learning: PES rule}
 
 \citeA{MacNeil2011} proposed a learning rule
 that minimizes the error minimized
 in Equation~\eqref{eq:decoders} online.
-
 \begin{align} \label{eq:pes}
   \Delta \mathbf{d}_i &= \kappa \mathbf{E} a_i \nonumber \\
   \Delta \omega_{ij} &= \kappa \alpha_j \mathbf{e}_j \cdot \mathbf{E} a_i,
@@ -287,15 +285,12 @@ they are both a means of translating a global error signal
 to a local error signal that can be used to
 change an individual synaptic connection weight.
 The key difference between this rule
-and backpropagation is the global-to-local mapping
+and backpropagation is that the global-to-local mapping
 is done by imposing the portion of the error vector space
-that each neuron will be sensitive to via the encoder.
-%While prescribing each neuron's error sensitivity
-%may make it less flexible than the hidden units
-%used in backpropagation, if the dimensionality
-%of the vector space is known,
-%it can learn arbitrary functions in that space.
-We will refer to this rule as
+each neuron is sensitive to via its encoder.
+This limits flexibility, but removes the dependency
+on global information, making the rule biologically plausible.
+We will refer to Equation~\eqref{eq:pes} as
 the Prescribed Error Sensitivity (PES) rule.
 
 \subsection{Unsupervised learning: Spiking BCM rule}
@@ -313,18 +308,18 @@ The general form is
   \Delta \omega_{ij} = a_i a_j (a_j - \theta),
 \end{equation}
 where $\theta$ is the \textit{modification threshold}.
-When the output activity $a_j$ is
+When the postsynaptic activity, $a_j$, is
 greater than the modification threshold,
 the synapse will be potentiated;
-when the output activity is less than the modification threshold,
+when the postsynaptic activity is less than the modification threshold,
 the synapse will be depressed.
 
 The modification threshold reflects the expectation
 of a cell's activity.
 It is typically calculated as
-the temporal average of the output activity $a_j$
-for a long time window (on the order of hours).
-The idea behind BCM is that cells
+the temporal average of the cell's activity
+over a long time window (on the order of hours).
+The intuition behind BCM is that cells
 driven above their expectation
 must be playing an important role in a circuit,
 so their afferent synapses become potentiated.
@@ -335,9 +330,7 @@ to reflect the new expectation
 of the cell's activity.
 
 However, BCM as originally formulated
-is based on rate neurons,
-not the discontinuous spiking neurons
-used in biologically plausible simulations.
+is based on non-spiking rate neurons.
 We implement BCM in biologically plausible spiking networks
 by interpreting neural activity as
 spikes that are filtered by
@@ -349,7 +342,7 @@ a postsynaptic current curve.
 \end{align}
 where $a$, the activity of a neuron,
 is interpreted as a filtered spike train,
-as in equation \eqref{eq:filter-spikes},
+as in Equation~\eqref{eq:filter-spikes},
 and $\tau$ is
 the time constant of
 the modification threshold's exponential filter.
@@ -379,7 +372,7 @@ that combines the error-minimization abilities of the PES rule
 with the biological plausibility and sparsification
 of the spiking BCM rule.
 The rule is a weighted sum of the
-unique terms in each rule.
+terms in each rule.
 \begin{equation} \label{eq:hpes}
   \Delta \omega_{ij} = \kappa \, \alpha_j a_i \left(
     S \, \mathbf{e}_j \cdot \mathbf{E} + (1 - S) \, a_j(a_j - \theta) \right),
@@ -412,7 +405,7 @@ modify connection weights.
 A more general form of Equation~\eqref{eq:hpes}
 would replace the local error quantity
 $\mathbf{e}_j \cdot \mathbf{E}$ with $\delta$,
-which could be determined through another method.
+which could be determined through any method.
 However, for clarity, we will use hPES
 to refer to the specific form in
 Equation~\eqref{eq:hpes}.
@@ -433,9 +426,7 @@ are MIT licensed and available at
 
 \subsubsection{Experiment 1: Unsupervised learning}
 
-In order to investigate the effects
-of unsupervised learning,
-we constructed a network composed of two populations
+We constructed a network composed of two populations
 connected in a feedforward manner
 such that one population provides input to the other.
 The network can be run in a ``control'' regime,
@@ -444,27 +435,30 @@ are solved for with the NEF's least-squares optimization
 and do not change, or in a ``learning'' regime,
 in which the weights are the same as the control network,
 but change over time according to the hPES rule \eqref{eq:hpes}
-with $S = 0$ (i.e., according to the spiking BCM rule \eqref{eq:bcm}).
+with $S = 0$ (i.e., according to the spiking BCM rule [\ref{eq:bcm}]).
+This experiment tests the hypothesis that the unsupervised
+component of the hPES rule increases sparsity
+of the connection weight matrix.
 
 \subsubsection{Experiment 2: Supervised learning}
 
-In order to investigate the effects of supervised and
-simultaneous supervised and unsupervised learning,
-we constructed a network composed of two populations
+We constructed a network composed of two populations
 connected in a feedforward manner,
-and several other populations that provide
-an error signal and collect performance information.
+and one population that provides
+an error signal to the downstream population.
 The network can be run in a ``control'' regime,
 in which the weights between the two populations
 are computed to transmit a three-dimensional semantic pointer,
 or to bind two three-dimensional semantic pointers
-into a single three-dimensional pointer.
-Both of these are commonly used operations
-in large-scale cognitive networks like Spaun.
+into one three-dimensional pointer.
 The network can be run in a ``learning'' regime,
 in which the weights between the two populations
 are initially random
 and are modified over time by the hPES rule.
+This experiment tests the hypothesis that the hPES
+rule can learn to transmit and bind semantic pointers
+as well as the control network and the supervised
+learning rule (i.e., hPES with $S=1$).
 
 \subsubsection{Experiment 3: Digit classification}
 
@@ -488,7 +482,7 @@ the confidence that the input representation should
 be classified into one of the 10 possible digits.
 The classified digit is the one corresponding
 to the dimension with the highest activity
-when a 50-dimensional input is presented.
+over 30 ms when a 50-dimensional input is presented.
 60,000 labeled training examples
 were shown to the network while
 the hPES rule was active.
@@ -498,7 +492,9 @@ was not provided.
 The results are compared to an analogous control network,
 in which the 50-dimensional pointers are classified
 with a cleanup memory whose connection weights
-are static \cite{Eliasmith2012}.
+are static, as in \citeA{Eliasmith2012}.
+This experiment examines how well the hPES rule scales
+to high-dimensional spaces.
 
 \subsubsection{Learning parameters}
 
@@ -507,8 +503,8 @@ involved in each network simulation,
 the vast majority are randomly selected
 within a biologically plausible range
 without significantly affecting performance.
-However, some parameters, especially those affecting
-the learning rule, have a significant performance effect.
+Some parameters, especially those affecting
+the learning rule, can have a significant performance effect.
 These significant parameters and the values
 used in specific simulations are listed
 in Tables~\ref{tab:params-1} and \ref{tab:params-2}.
@@ -571,13 +567,13 @@ extremely similar to the classical
   Solid and dashed lines are best fits of the curve
   $a\,e^{-x / \tau}$ for the experimental
   and simulated data, respectively.
-  Experimental data from \cite{Bi2001}.}
+  Experimental data from \citeA{Bi2001}.}
 \label{fig:stdp-curve}
 \end{figure}
 
 However, these STDP curves do not capture
-the frequency dependence of STDP;
-in order to capture those effects,
+the frequency dependence of STDP.
+In order to capture those effects,
 modellers have created STDP rules that take into
 account triplets and quadruplets of spikes,
 rather than just pre-post spike pairings \cite{Pfister2006}.
@@ -586,7 +582,7 @@ the frequency dependence of the STDP protocol.
 Figure~\ref{fig:stdp-freq} shows that,
 despite being a much simpler rule,
 the hPES rule with $S = 0$
-also exhibits appropriate frequency dependence.
+also exhibits frequency dependence.
 
 \begin{figure}[ht]
 \begin{center}
@@ -596,7 +592,7 @@ also exhibits appropriate frequency dependence.
   connected with the hPES rule, $S = 0$.
   This also demonstrates the effect of different $\theta$
   values on the frequency dependence curve.
-  Experimental data from \cite{Kirkwood1996}.}
+  Experimental data from \citeA{Kirkwood1996}.}
 \label{fig:stdp-freq}
 \end{figure}
 
@@ -646,7 +642,7 @@ can be seen decreasing over time in Figure~\ref{fig:learn}.
 The parameters used for Figure~\ref{fig:learn}
 are listed in Tables~\ref{tab:params-1} and \ref{tab:params-2}.
 The transformations are learned quickly
-(approximately 25s for transmission, 45s for binding).
+(approximately 25 seconds for transmission, 45 seconds for binding).
 Therefore, the central binding and transmission
 operations of the SPA
 are learnable with the hPES rule.
@@ -660,7 +656,7 @@ the intuitively more complex operation,
 is more reliably learned than transmission.
 This is due to how effectively
 the NEF can optimize weights to perform
-this simple linear transformation
+linear transformations like transmission
 in the control networks.
 
 \begin{figure}[ht]
@@ -676,24 +672,26 @@ in the control networks.
   For the transmission network, every 0.5 seconds,
   the learning rule is disabled,
   and error is accumulated over 2 seconds.
-  Filled regions are bootstrapped 95\% confidence intervals.}
+  Filled regions are bootstrapped 95\% confidence intervals.
+  Time is simulated time, not computation time.}
 \label{fig:learn}
 \end{figure}
 
 As a proof of concept that the hPES rule
-can operate in higher-dimensional spaces,
+scales to high-dimensional spaces,
 Table~\ref{tab:digits} shows that 
 the learned handwritten digit classification network
-achieves higher classification
-accuracy than does the analogous
-subnetwork in Spaun \cite{Eliasmith2012}.
+classifies digits more accurately than Spaun's cleanup memory
+\cite{Eliasmith2012}.
 This supports the suggestion that the hPES rule
-scales to higher-dimensional spaces.
+scales to high-dimensional spaces.
 While the hPES rule with $S < 1$
-achieved higher classification accuracy,
+achieved higher classification accuracy
+than hPES with $S = 1$,
 not enough trials were attempted to
 statistically confirm a benefit to combined
-unsupervised and supervised learning for classification.
+unsupervised and supervised learning for classifying
+handwritten digits.
 
 \begin{table}[!ht]
 \begin{center} 
@@ -714,11 +712,10 @@ hPES learning            & 98.47\% \\
 
 \subsection{hPES is less sensitive to parameters}
 
-The parameters of the hPES rule in each network
-were optimized while learning
-the binding and transmission operations.
-$S$ was fixed for 50 simulations for both binding and transmission,
-then allowed to change for 50 simulations.
+The parameters of the hPES rule were optimized with
+$S$ fixed at 1 for 50 simulations of binding and transmission.
+A separate parameter optimization that allowed $S$ to change
+was done for 50 simulations of binding and transmission.
 
 \begin{figure}[ht]
 \begin{center}
@@ -726,25 +723,28 @@ then allowed to change for 50 simulations.
 \end{center}
 \caption{Summary of error rates for networks used
   to optimize learning parameters. Each column
-  summarizes 50 experiments of the labeled condition,
-  with the box denoting the median and inter-quartile range.
+  summarizes 50 experiments of the labeled condition.
+  Boxes indicate the median and inter-quartile range,
+  and whiskers indicate the inner fence (i.e.,
+  $Q_1 - 1.5 \: IQR$ and $Q_3 + 1.5 \: IQR$).
   Outliers are not shown.}
 \label{fig:params}
 \end{figure}
 
 Surprisingly, despite optimizing over an additional dimension,
-when $S < 1$ error rates were
+when $S$ was allowed to change, error rates were
 lower during the optimization process
-for the binding network, but not the transmission network.
-In both cases, the variance of the hPES rule is lower.
+for the binding network but not the transmission network.
+In both cases, the interquartile range of the hPES rule's
+performance when $S$ was allowed to change is lower.
 Figure~\ref{fig:params} summarizes the performance of
 all 200 networks generated for parameter optimization.
-While in all cases parameters were found that achieve
+While in all four cases parameters were found that achieve
 error rates close to the control networks,
-hPES was much more robust to changes
-in the parameters when $S < 1$ in the binding case.
+hPES was more robust to changes
+in parameters when $S$ was allowed to change.
 This suggests that unsupervised learning
-may be beneficial in higher-dimensional nonlinear situations.
+may be beneficial in high-dimensional nonlinear situations.
 
 \section{Discussion}
 
@@ -755,24 +755,23 @@ in a biologically plausible manner.
 We have shown that the unsupervised component of the rule
 increases sparsity of connection weights
 at the cost of increased signal transmission error.
-We have shown that the combined learning rule, hPES,
-can learn transformations as well as the supervised rule,
-and as well as the network optimized offline.
-We have also demonstrated that the combined learning rule
+We have also shown that the combined learning rule, hPES,
+can learn transformations as well as the supervised rule
+and the offline optimization done in the Neural Engineering Framework.
+We have demonstrated that the combined learning rule
 is more robust to changes in parameters
 when learning nonlinear transformations.
 
 However, it is still the case that
 the parameters of the learning rule
-were optimized for each transformation
-that was to be learned.
+were optimized for each transformation learned.
 This is a challenge shared by all learning rules,
 but in the context of biologically plausible simulations,
 there is the additional question of
 the biological correlate of these parameters.
 It could be the case that these parameters
 are a result of the structure of the neuron,
-and therefore are a fixed property of the neuron.
+and therefore act as a fixed property of the neuron.
 However, it could also be the case that
 these parameters are related to the activity of the network,
 and are modified by each neuron's activity,
