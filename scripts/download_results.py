@@ -3,15 +3,12 @@ try:
 except:
     print ("Requires requests. Please apt-get install python-requests,"
            " or pip install requests.")
-    import sys
-    sys.exit()
+    raise
 
 import json
 import os
 import zipfile
 
-
-resultsdir = "results/"
 
 def download_all(article_id, outdir, unzip=False):
     r = requests.get("http://api.figshare.com/v1/articles/" + article_id)
@@ -32,22 +29,3 @@ def download_all(article_id, outdir, unzip=False):
                 zf.extractall(outdir)
             os.remove(outpath)
 
-print "============"
-print "Experiment 1"
-print "============"
-download_all("155314", resultsdir + "bcm")
-
-print "========================="
-print "Experiment 2 optimization"
-print "========================="
-download_all("155525", resultsdir + "functions-optimize", unzip=False)
-
-print "============"
-print "Experiment 2"
-print "============"
-download_all("155606", resultsdir + "functions-test", unzip=False)
-
-print "============"
-print "Experiment 3"
-print "============"
-download_all("155317", resultsdir + "digits", unzip=True)

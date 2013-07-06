@@ -101,6 +101,13 @@ if False:
     net.add_to_nengo()
     #net.view()
 else:
+    import sys
+
+    print sys.argv
+
+    if len(sys.argv == 2):
+        raise Exception("Usage: nengo-cl LearnDigits.py hPES|PES")
+
     params = {
         'hPES': {
             'nperd': 25,
@@ -114,5 +121,5 @@ else:
         },
     }
 
-    learn_type = 'hPES'
+    learn_type = sys.argv[2]
     run(make(learn_type=learn_type, **params[learn_type]), learn_type)

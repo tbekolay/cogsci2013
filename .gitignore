@@ -47,3 +47,5 @@ nosetests.xml
 *.log
 bekolay_1_31.pdf
 
+# Let's not check in tons of data
+results/
