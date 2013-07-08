@@ -6,8 +6,8 @@ import os.path
 from datetime import datetime
 
 scriptdir = os.path.expanduser("~/nengo-latest/trevor/")
-datadir = os.path.expanduser("~/Programming/cogsci/data/")
-logdir = os.path.expanduser("~/Programming/cogsci/results/digits/")
+datadir = os.path.expanduser("~/Code/cogsci2013/data/")
+logdir = os.path.expanduser("~/Code/cogsci2013/results/digits/")
 
 # Globals
 steps_per_input = 50
@@ -105,7 +105,7 @@ else:
 
     print sys.argv
 
-    if len(sys.argv == 2):
+    if len(sys.argv) == 1:
         raise Exception("Usage: nengo-cl LearnDigits.py hPES|PES")
 
     params = {
@@ -121,5 +121,5 @@ else:
         },
     }
 
-    learn_type = sys.argv[2]
+    learn_type = sys.argv[1]
     run(make(learn_type=learn_type, **params[learn_type]), learn_type)

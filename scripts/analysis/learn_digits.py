@@ -4,8 +4,8 @@ import os
 import numpy as np
 from numpy.lib.stride_tricks import as_strided as ast
 
-actualdata = '../../data/60k10klabel.csv'
-resultsdir = '../../results/digits/'
+actualdata = os.path.expanduser("~/Code/cogsci2013/data/60k10klabel.csv")
+resultsdir =  os.path.expanduser("~/Code/cogsci2013/results/digits/")
 
 TRAINSAMPLES = 60000
 
@@ -118,9 +118,12 @@ def get_actual(fn):
     return np.array(actual, dtype=int)
 
 
-if __name__ == '__main__':
+def main():
     actual = get_actual(actualdata)
 
     for d_f in glob(resultsdir + 'digits-*.csv'):
         accuracy = get_accuracy(*get_data(d_f), actual=actual)
         print "%s: %1.2f%%" % (d_f, accuracy * 100)
+
+if __name__ == '__main__':
+    main()
