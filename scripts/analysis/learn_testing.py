@@ -1,26 +1,26 @@
+from glob import glob
+import os
+import os.path
+import sys
+import zipfile
+currentdir = os.path.dirname(os.path.realpath(__file__))
+sys.path.append(currentdir + '/../nengo')
+
+import numpy as np
 import matplotlib
 matplotlib.use('Agg')
 font = {'family': 'serif', 'serif': 'Times New Roman'}
 matplotlib.rc('font', **font)
 matplotlib.rc('figure', dpi=100)
-import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
+
 from bootstrap import ci
-from glob import glob
-import os
-import os.path
-import zipfile
-try:
-    from hyperopt import STATUS_OK
-except:
-    print 'hyperopt not installed'
-import sys
-sys.path.append('..')
 from LearnBuilder import LearnBuilder
 
-figuredir = "../../figures/"
-resultsdir = "../../results/"
+figuredir = currentdir + "/../../figures"
+resultsdir = currentdir + "/../../results"
+
 
 def get_params(fn):
     with open(fn, 'r') as pfile:
@@ -54,7 +54,7 @@ def process_csv(fn, func, testtype):
 
     # Return one of the losses, if a correct one was passed in
     return {
-        'status': STATUS_OK,
+        'status': 'ok',
         'loss': loss,
     }
 
@@ -69,7 +69,7 @@ def read_results_from_zip(zfn):
     return loss
 
 
-def plot_learn_curves(channel_zips, conv_zips, group_by='learn_type'):
+def plot_learn_curves(channel_zips, conv_zips, group_by='learn_type', ext='pdf'):
     # Start plotting
     plt.figure(figsize=(6, 4))
 
@@ -132,13 +132,13 @@ def plot_learn_curves(channel_zips, conv_zips, group_by='learn_type'):
 
     plt.tight_layout()
     plt.subplots_adjust(wspace=0)
-    plt.savefig('%s/fig5-learn-curves.pdf' % figuredir)
-    print "Saved fig5-learn-curves.pdf"
+    plt.savefig('%s/fig5-learn-curves.%s' % (figuredir, ext))
+    print "Saved fig5-learn-curves.%s" % ext
     plt.close()
 
 
 def plot_params(channel_zips, conv_zips,
-                group_by='learn_type', sort_by='error'):
+                group_by='learn_type', sort_by='error', ext='pdf'):
     rel_err = {}
     for func, zips in zip(('ch', 'conv'), (channel_zips, conv_zips)):
         data = process_zips(zips)
@@ -171,8 +171,8 @@ def plot_params(channel_zips, conv_zips,
     plt.tight_layout()
     plt.subplots_adjust(wspace=0, top=0.92)
 
-    plt.savefig('%s/fig6-param-boxplot.pdf' % figuredir)
-    print "Saved fig6-param-boxplot.pdf"
+    plt.savefig('%s/fig6-param-boxplot.%s' % (figuredir, ext))
+    print "Saved fig6-param-boxplot.%s" % ext
     plt.close()
 
 
@@ -240,18 +240,14 @@ def get_data(fp, func, testtype):
     time = np.arange(len(test_st) - 1) * train
     return time, error
 
-
-if __name__ == '__main__':
-    if len(sys.argv) > 1:
-        funcs = (sys.argv[1],)
-    else:
-        funcs = ('channel', 'conv')
+def main(plot_ext='pdf'):
+    funcs = ('channel', 'conv')
 
     zips = {}
     zips['channel'] = [z[:-4] for z in
-                       glob(resultsdir + 'functions-test/channel*.zip')]
+                       glob(resultsdir + '/functions-test/channel*.zip')]
     zips['conv'] = [z[:-4] for z in
-                    glob(resultsdir + 'functions-test/conv*.zip')]
+                    glob(resultsdir + '/functions-test/conv*.zip')]
 
     for func in funcs:
         data = process_zips(zips[func])
@@ -262,11 +258,14 @@ if __name__ == '__main__':
             for i, val in enumerate(v):
                 print "%d. %s" % (i + 1, val)
 
-    plot_learn_curves(zips['channel'], zips['conv'])
+    plot_learn_curves(zips['channel'], zips['conv'], ext=plot_ext)
 
     zips['channel'] = [z[:-4] for z in
-                       glob(resultsdir + 'functions-optimize/channel*.zip')]
+                       glob(resultsdir + '/functions-optimize/channel*.zip')]
     zips['conv'] = [z[:-4] for z in
-                    glob(resultsdir + 'functions-optimize/conv*.zip')]
+                    glob(resultsdir + '/functions-optimize/conv*.zip')]
 
-    plot_params(zips['channel'], zips['conv'])
+    plot_params(zips['channel'], zips['conv'], ext=plot_ext)
+    
+if __name__ == '__main__':
+    main()

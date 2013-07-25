@@ -1,5 +1,5 @@
-from numpy.random import randint
 import numpy as np
+from numpy.random import randint
 
 
 def ci(data, statfunction=np.mean, alpha=0.05, n_samples=10000, axis=0):

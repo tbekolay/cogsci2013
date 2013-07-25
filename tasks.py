@@ -3,7 +3,10 @@ import os.path
 from invoke import run, task
 
 from scripts.download_results import download_all
+from scripts.analysis.bcm import main as analyze_bcm
+from scripts.analysis.bcm_nengo import main as analyze_bcm_nengo
 from scripts.analysis.learn_digits import main as analyze_digits
+from scripts.analysis.learn_testing import main as analyze_learn
 
 thisdir = os.path.dirname(os.path.realpath(__file__))
 nengodir = os.path.expanduser("~/nengo-latest/")
@@ -45,3 +48,8 @@ def sim(simfile, args=""):
 def analyze(target='all'):
     if target in ('all', 'digits'):
         analyze_digits()
+    if target in ('all', 'bcm'):
+        analyze_bcm('svg')
+        analyze_bcm_nengo('svg')
+    if target in ('all', 'learn'):
+        analyze_learn('svg')

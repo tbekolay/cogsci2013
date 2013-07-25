@@ -1,14 +1,18 @@
+import os
+
+import numpy as np
 import matplotlib
 matplotlib.use('Agg')
 font = {'family': 'serif', 'serif': 'Times New Roman'}
 matplotlib.rc('font', **font)
 matplotlib.rc('figure', dpi=100)
-import numpy as np
 import matplotlib.pyplot as plt
-from bootstrap import ci
 from scipy.optimize import curve_fit
 
-figuredir = "../../figures/"
+from bootstrap import ci
+
+currentdir = os.path.dirname(os.path.realpath(__file__))
+figuredir = currentdir + "/../../figures"
 
 class BCMSim(object):
     def __init__(self, theta, tau_pre, tau_post, pulse_delay, pulse_rate,
@@ -115,27 +119,8 @@ class BCMSim(object):
 
         return self.t, self.a_pre, self.a_post, self.omega, self.theta
 
-    def plot_activity(self, name):
-        if self.t is None:
-            self.run()
-      
-        plt.figure(figsize=(6,8))
 
-        # plt.title("Pulse delay: " + str(round(pulse_delays[ix],2)))
-        plt.plot(self.t, self.a_pre, lw=1.5, label='Presynaptic')
-        plt.plot(self.t, self.a_post, lw=1.5, label='Postsynaptic')
-        plt.plot(self.t, self.omega, lw=1.5, label='Weight')
-        plt.legend(loc=2)
-        plt.axhline(lw=1.0, color='k')
-        plt.axis([0.0, self.t[-1],
-                  min(np.amin(self.omega), -10),
-                  max(np.amax(self.omega),130)])
-        plt.savefig('%s/%s.pdf' % (figuredir, name))
-        print "Saved %s.pdf" % name
-        plt.close()
-
-
-def plot_stdp_curves(sim, exp):
+def plot_stdp_curves(sim, exp, ext='pdf'):
     plt.figure(figsize=(4.5, 3.5))
     plt.title('Replicated STDP curve')
     
@@ -157,12 +142,12 @@ def plot_stdp_curves(sim, exp):
     plt.axis((-0.1, 0.1, -0.85, 1.15))
     plt.legend(loc=2, prop={'size': 12})
     plt.tight_layout()
-    plt.savefig('%s/fig1-bcm-stdp.pdf' % figuredir)
-    print "Saved fig1-bcm-stdp.pdf"
+    plt.savefig('%s/fig1-bcm-stdp.%s' % (figuredir, ext))
+    print "Saved fig1-bcm-stdp.%s" % ext
     plt.close()
 
 
-def plot_frequencies(sim, exp):
+def plot_frequencies(sim, exp, ext='pdf'):
     plt.figure(figsize=(4.5, 3.5))
     plt.title('Frequency dependence of STDP')
     
@@ -199,8 +184,8 @@ def plot_frequencies(sim, exp):
     plt.legend(loc=4, prop={'size': 11})
     plt.axis((0.7, 150.0, -0.22, 0.25))
     plt.tight_layout()
-    plt.savefig('%s/fig2-bcm-stdp-frequency.pdf' % figuredir)
-    print "Saved fig2-bcm-stdp-frequency.pdf"
+    plt.savefig('%s/fig2-bcm-stdp-frequency.%s' % (figuredir, ext))
+    print "Saved fig2-bcm-stdp-frequency.%s" % ext
     plt.close()
 
 
@@ -230,8 +215,6 @@ def simulate(theta, bcm_params, vary,
             sim = BCMSim(theta, start_omega=start_omegas[i][j], **params)
             sim.run()
             end_omegas[i][j] = sim.omega[-1]
-            if plot is not None:
-                sim.plot_activity('%s-pr%f' % (plot, pulse_rate))
 
     return end_omegas.squeeze()
 
@@ -269,7 +252,7 @@ exp_stdp = {
     'fit_y': stdp_fit_y,
 }
 
-if __name__ == '__main__':
+def main(plot_ext='pdf'):
     #
     # Recreate STDP curve
     #
@@ -296,7 +279,7 @@ if __name__ == '__main__':
         'fit_y': sim_curve_y,
     }
 
-    plot_stdp_curves(sim_stdp, exp_stdp)
+    plot_stdp_curves(sim_stdp, exp_stdp, plot_ext)
     
     #
     # Recreate frequency effects
@@ -336,4 +319,8 @@ if __name__ == '__main__':
         'high_h': high_conf[1],
     }
 
-    plot_frequencies(sim_freq_data, exp_freq_data)
+    plot_frequencies(sim_freq_data, exp_freq_data, plot_ext)
+
+
+if __name__ == '__main__':
+    main()

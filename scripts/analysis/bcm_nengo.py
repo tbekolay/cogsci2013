@@ -1,15 +1,19 @@
+from glob import glob
+import os
+
+import numpy as np
 import matplotlib
 matplotlib.use('Agg')
 font = {'family': 'serif', 'serif': 'Times New Roman'}
 matplotlib.rc('font', **font)
 matplotlib.rc('figure', dpi=100)
-import numpy as np
 import matplotlib.pyplot as plt
-from bootstrap import ci
-from glob import glob
 
-figuredir = "../../figures/"
-resultsdir = "../../results/bcm/"
+from bootstrap import ci
+
+currentdir = os.path.dirname(os.path.realpath(__file__))
+figuredir = currentdir + "/../../figures"
+resultsdir = currentdir + "/../../results/bcm"
 
 def gini_index(vector):
     # ensure sorted (but don't change original vector)
@@ -83,7 +87,7 @@ def get_mse(control_files, other_files):
     return time, conf[0], mean, conf[1]
 
 
-def plot_bcm(control_files, random_files, bcm_files):
+def plot_bcm(control_files, random_files, bcm_files, ext='pdf'):
     t, transform = get_sparsity(bcm_files)
     t, rand_l, rand_m, rand_h = get_mse(control_files, random_files)
     t, bcm_l, bcm_m, bcm_h = get_mse(control_files, bcm_files)
@@ -111,14 +115,16 @@ def plot_bcm(control_files, random_files, bcm_files):
 
     plt.tight_layout()
     plt.subplots_adjust(hspace=0.0)
-    plt.savefig('%s/fig3-bcm.pdf' % figuredir)
-    print "Saved fig3-bcm.pdf"
+    plt.savefig('%s/fig3-bcm.%s' % (figuredir, ext))
+    print "Saved fig3-bcm.%s" % ext
     plt.close()
 
 
-if __name__ == '__main__':
-    control_files = sorted(glob(resultsdir + "control-*.csv"))
-    random_files = sorted(glob(resultsdir + "random-*.csv"))
-    bcm_files = sorted(glob(resultsdir + "bcm-*.csv"))
-    plot_bcm(control_files, random_files, bcm_files)
+def main(plot_ext="pdf"):
+    control_files = sorted(glob(resultsdir + "/control-*.csv"))
+    random_files = sorted(glob(resultsdir + "/random-*.csv"))
+    bcm_files = sorted(glob(resultsdir + "/bcm-*.csv"))
+    plot_bcm(control_files, random_files, bcm_files, plot_ext)
 
+if __name__ == '__main__':
+    main()
