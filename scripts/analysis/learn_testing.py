@@ -12,6 +12,8 @@ matplotlib.use('Agg')
 font = {'family': 'serif', 'serif': 'Times New Roman'}
 matplotlib.rc('font', **font)
 matplotlib.rc('figure', dpi=100)
+matplotlib.rc('svg', fonttype='none')
+matplotlib.rc('legend', frameon=False)
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 
@@ -69,9 +71,14 @@ def read_results_from_zip(zfn):
     return loss
 
 
-def plot_learn_curves(channel_zips, conv_zips, group_by='learn_type', ext='pdf'):
-    # Start plotting
-    plt.figure(figsize=(6, 4))
+def plot_learn_curves(channel_zips, conv_zips, rules=('hPES', 'PES'),
+                      presentation=False):
+    group_by = 'learn_type'
+
+    figsize = (8, 6) if presentation else (5, 4)
+    if presentation:
+        matplotlib.rc('font', size=18)
+    plt.figure(figsize=figsize)
 
     for func, zips in zip(('channel', 'conv'), (channel_zips, conv_zips)):
         filenames = {'PES': [], 'hPES': [], 'control': []}
@@ -99,7 +106,6 @@ def plot_learn_curves(channel_zips, conv_zips, group_by='learn_type', ext='pdf')
         control = np.mean(control, axis=0)
 
         # Get the non-control results
-        rules = ('hPES', 'PES')
         colors = ('b', 'g')
         for rule, color in zip(rules, colors):
             err = []
@@ -114,31 +120,47 @@ def plot_learn_curves(channel_zips, conv_zips, group_by='learn_type', ext='pdf')
             conf = ci(err, axis=0)
 
             if func == 'channel':
-                ax = plt.subplot(122)
+                plt.subplot(122)
                 plt.title('Learning transmission')
-                ax.yaxis.tick_right()
+                plt.ylim(-0.4, 9)
+                plt.gca().yaxis.tick_right()
             elif func == 'conv':
                 plt.subplot(121)
                 plt.title('Learning binding')
                 plt.ylabel('Error relative to control mean')
                 plt.xticks(np.arange(0, 80, 20))
                 plt.xlim((0, 80))
+                plt.ylim(0.9, 1.6)
+                plt.gca().yaxis.set_ticks_position('left')
+
+            plt.gca().spines['top'].set_visible(False)
+            plt.gca().xaxis.set_ticks_position('bottom')
+
             plt.xlabel('Learning time (seconds)')
             plt.axhline(1.0, lw=1, color='0.3')
             plt.fill_between(time, y1=conf[1], y2=conf[0],
                              color=color, alpha=0.3)
+            if presentation:
+                rule = 'Combined' if rule == 'hPES' else 'Supervised'
             plt.plot(time, mean, color=color, lw=1, label=rule)
-            plt.legend(prop={'size':12})
+            if len(rules) > 1:
+                if presentation:
+                    plt.legend(prop={'size':16})
+                else:
+                    plt.legend(prop={'size':12})
 
     plt.tight_layout()
     plt.subplots_adjust(wspace=0)
-    plt.savefig('%s/fig5-learn-curves.%s' % (figuredir, ext))
-    print "Saved fig5-learn-curves.%s" % ext
+    name = 'fig4-learn-curves' if len(rules) == 2 else 'learncurve-pes'
+    ext = 'svg' if presentation else 'pdf'
+    plt.savefig('%s/%s.%s' % (figuredir, name, ext), transparent=True)
+    print "Saved fig4-learn-curves.%s" % ext
     plt.close()
 
 
-def plot_params(channel_zips, conv_zips,
-                group_by='learn_type', sort_by='error', ext='pdf'):
+def plot_params(channel_zips, conv_zips, presentation=False):
+    group_by = 'learn_type'
+    sort_by = 'error'
     rel_err = {}
     for func, zips in zip(('ch', 'conv'), (channel_zips, conv_zips)):
         data = process_zips(zips)
@@ -148,31 +170,50 @@ def plot_params(channel_zips, conv_zips,
             rel_err[func + '-' + learn_type] = np.array(
                 [v[0] for v in data[learn_type]]) / mean_error
 
-    fig = plt.figure(figsize=(5, 3.5))
-    plt.suptitle("Error rates for all parameter sets", fontsize=14)
+    figsize = (8, 6) if presentation else (5, 3.5)
+    if presentation:
+        matplotlib.rc('font', size=18)
+    fig = plt.figure(figsize=figsize)
+    fontsize = 20 if presentation else 14
+    plt.suptitle("Error rates for all parameter sets", fontsize=fontsize)
 
     plt.subplot(121)
     plt.axhline(1.0, color='k')
     lines = plt.boxplot((rel_err['conv-PES'], rel_err['conv-hPES']), sym='')
     for line in lines.values():
         plt.setp(line, color='black')
-    plt.xticks((1, 2), ('Bind PES', 'Bind hPES'))
+
+    if presentation:
+        plt.xticks((1, 2), ('Bind sup.', 'Bind combined'))
+    else:
+        plt.xticks((1, 2), ('Bind PES', 'Bind hPES'))
     plt.ylabel('Error relative to control mean')
+    plt.gca().spines['top'].set_visible(False)
+    plt.gca().xaxis.set_ticks_position('bottom')
+    plt.gca().yaxis.set_ticks_position('left')
 
     ax = plt.subplot(122)
     plt.axhline(1.0, color='k')
     lines = plt.boxplot((rel_err['ch-PES'], rel_err['ch-hPES']), sym='')
     for line in lines.values():
         plt.setp(line, color='black')
-    plt.xticks((1, 2), ('Transmit PES', 'Transmit hPES'))
+    if presentation:
+        plt.xticks((1, 2), ('Transmit sup.', 'Transmit comb.'))
+    else:
+        plt.xticks((1, 2), ('Transmit PES', 'Transmit hPES'))
     ax.yaxis.tick_right()
     plt.ylim((0.661, 2.7))
-    fig.autofmt_xdate(rotation=10)
+    if not presentation:
+        fig.autofmt_xdate(rotation=10)
+    plt.gca().spines['top'].set_visible(False)
+    plt.gca().xaxis.set_ticks_position('bottom')
+
     plt.tight_layout()
     plt.subplots_adjust(wspace=0, top=0.92)
 
-    plt.savefig('%s/fig6-param-boxplot.%s' % (figuredir, ext))
-    print "Saved fig6-param-boxplot.%s" % ext
+    ext = 'svg' if presentation else 'pdf'
+    plt.savefig('%s/fig5-param-boxplot.%s' % (figuredir, ext), transparent=True)
+    print "Saved fig5-param-boxplot.%s" % ext
     plt.close()
 
 
@@ -240,7 +281,7 @@ def get_data(fp, func, testtype):
     time = np.arange(len(test_st) - 1) * train
     return time, error
 
-def main(plot_ext='pdf'):
+def main(presentation=False):
     funcs = ('channel', 'conv')
 
     zips = {}
@@ -258,14 +299,18 @@ def main(plot_ext='pdf'):
             for i, val in enumerate(v):
                 print "%d. %s" % (i + 1, val)
 
-    plot_learn_curves(zips['channel'], zips['conv'], ext=plot_ext)
+    if presentation:
+        plot_learn_curves(zips['channel'], zips['conv'],
+                          rules=('PES',), presentation=presentation)
+    plot_learn_curves(zips['channel'], zips['conv'],
+                      presentation=presentation)
 
     zips['channel'] = [z[:-4] for z in
                        glob(resultsdir + '/functions-optimize/channel*.zip')]
     zips['conv'] = [z[:-4] for z in
                     glob(resultsdir + '/functions-optimize/conv*.zip')]
 
-    plot_params(zips['channel'], zips['conv'], ext=plot_ext)
-    
+    plot_params(zips['channel'], zips['conv'], presentation)
+
 if __name__ == '__main__':
     main()

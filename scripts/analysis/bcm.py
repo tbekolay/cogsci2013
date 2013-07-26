@@ -6,6 +6,8 @@ matplotlib.use('Agg')
 font = {'family': 'serif', 'serif': 'Times New Roman'}
 matplotlib.rc('font', **font)
 matplotlib.rc('figure', dpi=100)
+matplotlib.rc('svg', fonttype='none')
+matplotlib.rc('legend', frameon=False)
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 
@@ -23,11 +25,11 @@ class BCMSim(object):
 
         self.pulse_rate = pulse_rate
         self.pulse_gap = 1.0 / self.pulse_rate
-        
+
         if (pulse_delay < 0.0):
             pulse_delay += self.pulse_gap
         self.pulse_delay = pulse_delay
-        
+
         self.start_omega = start_omega
         self.theta_length = theta_length
         self.num_pairings = num_pairings
@@ -37,7 +39,7 @@ class BCMSim(object):
         self.a_pre = None
         self.a_post = None
         self.omega = None
-    
+
     @staticmethod
     def filter_spikes(spikes, tau, dt):
         a = np.zeros(len(spikes))
@@ -81,7 +83,7 @@ class BCMSim(object):
         y[x > 0] = BCMSim._stdp_rule_pre(x[x > 0], *popt_pre)
         y[x < 0] = BCMSim._stdp_rule_post(x[x < 0], *popt_post)
         y[x == 0] = np.nan
-        
+
         return x, y
 
     def run(self):
@@ -89,19 +91,19 @@ class BCMSim(object):
           # in s
         t_len = self.pulse_gap * (self.num_pairings)
         self.t = np.arange(0.0, t_len + self.dt, self.dt)
-  
+
         # Set up post spike train
         s_post = np.zeros_like(self.t)
         s_post[range(0, int(t_len / self.dt),
                      int(self.pulse_gap / self.dt))] = 1
         self.a_post = BCMSim.filter_spikes(s_post, self.tau_post, self.dt)
-  
+
         # Set up pre spike train
         s_pre = np.zeros_like(self.t)
         s_pre[range(int(self.pulse_delay / self.dt), int(t_len / self.dt),
                     int(self.pulse_gap / self.dt))] = 1
         self.a_pre = BCMSim.filter_spikes(s_pre, self.tau_pre, self.dt)
-  
+
         # Use BCM filter to find change in omega over time
         self.omega = np.zeros_like(self.t)
 
@@ -120,10 +122,13 @@ class BCMSim(object):
         return self.t, self.a_pre, self.a_post, self.omega, self.theta
 
 
-def plot_stdp_curves(sim, exp, ext='pdf'):
-    plt.figure(figsize=(4.5, 3.5))
+def plot_stdp_curves(sim, exp, presentation=False):
+    figsize = (8, 6) if presentation else (4.5, 3.5)
+    if presentation:
+        matplotlib.rc('font', size=18)
+    plt.figure(figsize=figsize)
     plt.title('Replicated STDP curve')
-    
+
     plt.scatter(sim['x'], sim['y'], color='0.6', label="Simulation")
     plt.scatter(exp['x'], exp['y'], color='0.6', facecolor='w',
                 label="Experiment")
@@ -140,17 +145,28 @@ def plot_stdp_curves(sim, exp, ext='pdf'):
     plt.xticks(np.linspace(-0.1, 0.1, 5),
                np.linspace(-100, 100, 5).astype(int))
     plt.axis((-0.1, 0.1, -0.85, 1.15))
-    plt.legend(loc=2, prop={'size': 12})
+    if not presentation:
+        plt.legend(loc=2, prop={'size': 12})
+    else:
+        plt.legend(loc=2, prop={'size': 16})
+    plt.gca().spines['top'].set_visible(False)
+    plt.gca().spines['right'].set_visible(False)
+    plt.gca().xaxis.set_ticks_position('bottom')
+    plt.gca().yaxis.set_ticks_position('left')
     plt.tight_layout()
-    plt.savefig('%s/fig1-bcm-stdp.%s' % (figuredir, ext))
+    ext = 'svg' if presentation else 'pdf'
+    plt.savefig('%s/fig1-bcm-stdp.%s' % (figuredir, ext), transparent=True)
     print "Saved fig1-bcm-stdp.%s" % ext
     plt.close()
 
 
-def plot_frequencies(sim, exp, ext='pdf'):
-    plt.figure(figsize=(4.5, 3.5))
+def plot_frequencies(sim, exp, presentation=False):
+    figsize = (8, 6) if presentation else (4.5, 3.5)
+    if presentation:
+        matplotlib.rc('font', size=18)
+    plt.figure(figsize=figsize)
     plt.title('Frequency dependence of STDP')
-    
+
     ax = plt.subplot(111)
     ax.set_xscale('log')
 
@@ -181,10 +197,19 @@ def plot_frequencies(sim, exp, ext='pdf'):
                np.linspace(-20, 20, 5).astype(int))
     plt.xticks([1.0, 5.0, 10.0, 20.0, 50.0, 100.0],
                ['1','5','10','20','50','100'])
-    plt.legend(loc=4, prop={'size': 11})
+    if not presentation:
+        plt.legend(loc=4, prop={'size': 11})
+    else:
+        plt.legend(loc=4, prop={'size': 14})
     plt.axis((0.7, 150.0, -0.22, 0.25))
+    plt.gca().spines['top'].set_visible(False)
+    plt.gca().spines['right'].set_visible(False)
+    plt.gca().xaxis.set_ticks_position('bottom')
+    plt.gca().yaxis.set_ticks_position('left')
     plt.tight_layout()
-    plt.savefig('%s/fig2-bcm-stdp-frequency.%s' % (figuredir, ext))
+    ext = 'svg' if presentation else 'pdf'
+    plt.savefig('%s/fig2-bcm-stdp-frequency.%s' % (figuredir, ext),
+                transparent=True)
     print "Saved fig2-bcm-stdp-frequency.%s" % ext
     plt.close()
 
@@ -205,9 +230,9 @@ def simulate(theta, bcm_params, vary,
             (len(vary), trials))
     else:
         start_omegas = np.zeros((len(vary), trials))
-    
+
     end_omegas = np.zeros_like(start_omegas)
-    
+
     for i, v in enumerate(vary):
         for j in range(trials):
             params = bcm_params.copy()
@@ -252,7 +277,7 @@ exp_stdp = {
     'fit_y': stdp_fit_y,
 }
 
-def main(plot_ext='pdf'):
+def main(presentation=False):
     #
     # Recreate STDP curve
     #
@@ -263,7 +288,7 @@ def main(plot_ext='pdf'):
         'tau_post': 0.01,
         'pulse_rate': 5.0,
     }
-    
+
     # Iterate over some pulse_delay values
     pulse_delays = np.linspace(-0.1, 0.1, 100)
 
@@ -279,8 +304,8 @@ def main(plot_ext='pdf'):
         'fit_y': sim_curve_y,
     }
 
-    plot_stdp_curves(sim_stdp, exp_stdp, plot_ext)
-    
+    plot_stdp_curves(sim_stdp, exp_stdp, presentation)
+
     #
     # Recreate frequency effects
     #
@@ -296,7 +321,7 @@ def main(plot_ext='pdf'):
     pulse_rates = [1.0, 2.0, 10.0, 20.0, 100.0]
 
     np.random.seed(6)  #1, 5
-    
+
     low_omegas = simulate(theta_low, freqparams, pulse_rates,
                           trials=25, random_start=True)
     low_scale = 0.2 / np.mean(low_omegas[-1])
@@ -319,7 +344,7 @@ def main(plot_ext='pdf'):
         'high_h': high_conf[1],
     }
 
-    plot_frequencies(sim_freq_data, exp_freq_data, plot_ext)
+    plot_frequencies(sim_freq_data, exp_freq_data, presentation)
 
 
 if __name__ == '__main__':

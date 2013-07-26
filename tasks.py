@@ -1,10 +1,12 @@
 import os.path
+import shutil
 
 from invoke import run, task
 
 from scripts.download_results import download_all
 from scripts.analysis.bcm import main as analyze_bcm
 from scripts.analysis.bcm_nengo import main as analyze_bcm_nengo
+from scripts.analysis.bcm_rule import main as analyze_bcm_rule
 from scripts.analysis.learn_digits import main as analyze_digits
 from scripts.analysis.learn_testing import main as analyze_learn
 
@@ -45,11 +47,28 @@ def sim(simfile, args=""):
     run("scripts/nengo-cl.sh " + simfile + " " + args, echo=True)
 
 @task
-def analyze(target='all'):
+def analyze(target='all', presentation=False):
     if target in ('all', 'digits'):
         analyze_digits()
     if target in ('all', 'bcm'):
-        analyze_bcm('svg')
-        analyze_bcm_nengo('svg')
+        analyze_bcm(presentation)
+        analyze_bcm_nengo(presentation)
+        if presentation:
+            analyze_bcm_rule()
+            shutil.copy2('figures/bcm_rule.svg',
+                         '../cogsci2013-pres/img/bcm_rule.svg')
+            shutil.copy2('figures/fig1-bcm-stdp.svg',
+                         '../cogsci2013-pres/img/stdp.svg')
+            shutil.copy2('figures/fig2-bcm-stdp-frequency.svg',
+                         '../cogsci2013-pres/img/freq.svg')
+            shutil.copy2('figures/fig3-bcm.svg',
+                         '../cogsci2013-pres/img/sparsity.svg')
     if target in ('all', 'learn'):
-        analyze_learn('svg')
+        analyze_learn(presentation)
+        if presentation:
+            shutil.copy2('figures/fig4-learn-curves.svg',
+                         '../cogsci2013-pres/img/learncurve.svg')
+            shutil.copy2('figures/learncurve-pes.svg',
+                         '../cogsci2013-pres/img/learncurve-pes.svg')
+            shutil.copy2('figures/fig5-param-boxplot.svg',
+                         '../cogsci2013-pres/img/params.svg')

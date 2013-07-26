@@ -7,6 +7,8 @@ matplotlib.use('Agg')
 font = {'family': 'serif', 'serif': 'Times New Roman'}
 matplotlib.rc('font', **font)
 matplotlib.rc('figure', dpi=100)
+matplotlib.rc('svg', fonttype='none')
+matplotlib.rc('legend', frameon=False)
 import matplotlib.pyplot as plt
 
 from bootstrap import ci
@@ -87,7 +89,7 @@ def get_mse(control_files, other_files):
     return time, conf[0], mean, conf[1]
 
 
-def plot_bcm(control_files, random_files, bcm_files, ext='pdf'):
+def plot_bcm(control_files, random_files, bcm_files, presentation=False):
     t, transform = get_sparsity(bcm_files)
     t, rand_l, rand_m, rand_h = get_mse(control_files, random_files)
     t, bcm_l, bcm_m, bcm_h = get_mse(control_files, bcm_files)
@@ -95,8 +97,11 @@ def plot_bcm(control_files, random_files, bcm_files, ext='pdf'):
     bcm_m[1:] = -1 * (bcm_m[1:] / rand_m[1:]) + 1
     bcm_h[1:] = -1 * (bcm_h[1:] / rand_m[1:]) + 1
 
-    plt.figure(figsize=(5, 4))
-    
+    figsize = (8, 6) if presentation else (5, 4)
+    if presentation:
+        matplotlib.rc('font', size=18)
+    plt.figure(figsize=figsize)
+
     plt.subplot(211)
     plt.title("Unsupervised learning in control network")
     plt.ylabel('Transmission accuracy')
@@ -104,6 +109,9 @@ def plot_bcm(control_files, random_files, bcm_files, ext='pdf'):
     plt.ylim((0, 1))
     plt.fill_between(t, y1=bcm_l, y2=bcm_h, color='0.7')
     plt.plot(t, bcm_m, color='k')
+    plt.gca().spines['top'].set_visible(False)
+    plt.gca().spines['right'].set_visible(False)
+    plt.gca().yaxis.set_ticks_position('left')
 
     plt.subplot(212)
     plt.ylabel('Weight sparsity')
@@ -112,19 +120,24 @@ def plot_bcm(control_files, random_files, bcm_files, ext='pdf'):
     plt.ylim((0.425, 0.65))
     plt.fill_between(t, y1=transform[0], y2=transform[2], color='0.7')
     plt.plot(t, transform[1], color='k')
+    plt.gca().spines['top'].set_visible(False)
+    plt.gca().spines['right'].set_visible(False)
+    plt.gca().xaxis.set_ticks_position('bottom')
+    plt.gca().yaxis.set_ticks_position('left')
 
     plt.tight_layout()
     plt.subplots_adjust(hspace=0.0)
-    plt.savefig('%s/fig3-bcm.%s' % (figuredir, ext))
+    ext = 'svg' if presentation else 'pdf'
+    plt.savefig('%s/fig3-bcm.%s' % (figuredir, ext), transparent=True)
     print "Saved fig3-bcm.%s" % ext
     plt.close()
 
 
-def main(plot_ext="pdf"):
+def main(presentation=False):
     control_files = sorted(glob(resultsdir + "/control-*.csv"))
     random_files = sorted(glob(resultsdir + "/random-*.csv"))
     bcm_files = sorted(glob(resultsdir + "/bcm-*.csv"))
-    plot_bcm(control_files, random_files, bcm_files, plot_ext)
+    plot_bcm(control_files, random_files, bcm_files, presentation)
 
 if __name__ == '__main__':
     main()
