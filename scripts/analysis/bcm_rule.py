@@ -3,7 +3,7 @@ import os
 import numpy as np
 import matplotlib
 matplotlib.use('Agg')
-font = {'family': 'serif', 'serif': 'Times New Roman'}
+font = {'family': 'serif', 'serif': 'Palatino Linotype'}
 matplotlib.rc('font', **font)
 matplotlib.rc('figure', dpi=100)
 matplotlib.rc('svg', fonttype='none')
@@ -15,7 +15,8 @@ figuredir = currentdir + "/../../figures"
 
 
 def main():
-    matplotlib.rc('font', size=18)
+    matplotlib.rc('font', size=20, serif='Palatino Linotype')
+    matplotlib.rc('mathtext', fontset='stix')
     theta_1 = 3.0
     def bcm_rule_1(x):
         return x * (x - theta_1)
@@ -28,13 +29,23 @@ def main():
     plt.fill_between(x1[:31], y1[:31], color='r')
     plt.fill_between(x1[30:], y1[30:], color='g')
     plt.axhline(ls='--', lw=1, color='k')
-    plt.axis((0.0, 5.0, -2.5, 6.0))
+    plt.axis((0.0, 4.35, -2.5, 6.0))
     plt.yticks([0])
-    plt.xticks([theta_1], [r"$\theta$"])
+    plt.xticks(())
     plt.gca().spines['top'].set_visible(False)
+    plt.gca().spines['bottom'].set_visible(False)
     plt.gca().spines['right'].set_visible(False)
-    plt.gca().xaxis.set_ticks_position('bottom')
-    plt.gca().yaxis.set_ticks_position('left')
+    plt.gca().spines['left'].set_visible(False)
+    plt.gca().xaxis.set_ticks_position('none')
+    plt.gca().yaxis.set_ticks_position('none')
+    plt.gca().annotate(r"$E[a_j]$",
+                       xy=(theta_1, 0), xycoords='data',
+                       xytext=(theta_1 - 0.5, 1.8), textcoords='data',
+                       size=20, va="center", ha="center",
+                       arrowprops=dict(arrowstyle="->",
+                                       connectionstyle="arc3, rad=-0.2"))
+    plt.xlabel(r"$a_j$")
+    plt.ylabel(r"$\Delta \omega_{ij}$")
     plt.savefig('%s/bcm_rule.svg' % figuredir, transparent=True)
 
 
